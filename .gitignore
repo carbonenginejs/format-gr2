@@ -1,0 +1,12 @@
+node_modules/
+*.log
+.DS_Store
+
+# local test fixtures / downloaded oracle data (never commit game assets)
+/.cache/
+/test/fixtures/
+*.gr2
+*.gr2_json
+
+# local tests may contain personal data
+/test/

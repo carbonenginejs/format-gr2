@@ -1,0 +1,31 @@
+carbonenginejs/gr2reader
+========================
+
+A pure-JavaScript reader for RAD Game Tools' Granny 3D (.gr2) file format.
+Contains no RAD/Granny code and does not link granny2.dll. Section decompression
+is reimplemented from clean-room / open reverse-engineering efforts, listed below.
+
+Third-party algorithm provenance
+--------------------------------
+
+Oodle1 / Oodle0 section decompressor (src/codecs/oodle1.js)
+  Ported from the open Granny2 decompressors:
+    - nwn2mdk  "gr2_decompress"        (Boost Software License 1.0)
+    - arves100/opengr2  "oodle1.c"     (MPL-2.0)   https://github.com/arves100/opengr2
+  This is Granny's own legacy codec, not RAD's modern Oodle (Kraken/BitKnit families).
+
+BitKnit / BitKnit2 section decompressor (src/codecs/bitknit2.js)
+  Ported from:
+    - neptuwunium/Knit  "GrannyBitKnitCompression.cs"  (EUPL-1.2, sublicensing
+      eiz/pybg3's clean-room rANS implementation under MIT)
+      https://github.com/neptuwunium/Knit  •  https://github.com/eiz/pybg3
+  Cross-checked against powzix/ooz "bitknit.cpp".
+
+Granny curve decompression (src/curves/**, optional; enabled via decompressCurves)
+  Adapted from cppctamber's granny extension for ccpwgl2 (src/core/reader/granny/curves).
+
+Container / relocation / type-tree reflection (src/container.js, src/reader.js)
+  Original to this project, derived from the on-disk Granny GRN format layout
+  (cross-referenced with the Granny SDK headers and the above projects' docs).
+
+Please retain this NOTICE and the upstream licenses when redistributing.

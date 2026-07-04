@@ -1,0 +1,43 @@
+{
+  "name": "gr2js",
+  "version": "0.1.0",
+  "description": "Pure-JavaScript reader for RAD Granny 3D .gr2 files — no granny2.dll. Decodes None/Oodle1/BitKnit2 sections, walks the Granny type tree, and emits gr2_json.",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "gr2js": "bin/gr2js.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test",
+    "lint": "eslint --ext .js,.mjs src bin",
+    "lint:fix": "eslint --fix --ext .js,.mjs src bin"
+  },
+  "keywords": [
+    "gr2",
+    "granny",
+    "granny3d",
+    "rad",
+    "oodle1",
+    "bitknit",
+    "eve-online",
+    "mesh",
+    "skeleton",
+    "animation"
+  ],
+  "files": [
+    "src",
+    "bin",
+    "NOTICE",
+    "README.md"
+  ],
+  "license": "SEE LICENSE IN NOTICE",
+  "devDependencies": {
+    "eslint": "^8.57.1"
+  }
+}
