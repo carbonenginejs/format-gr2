@@ -40,7 +40,7 @@ const
  */
 
 /**
- * Minimal `gr2_json` mesh shape used by the tangent helpers.
+ * Minimal GR2 JSON mesh shape used by the tangent helpers.
  *
  * @typedef {object} TangentMesh
  * @property {{position?: number[], normal?: number[], tangent?: number[], binormal?: number[]}} vertex
@@ -217,7 +217,7 @@ function vertexCount(mesh)
 }
 
 /**
- * Is this gr2_json mesh's tangent frame packed?
+ * Is this GR2 JSON mesh's tangent frame packed?
  *
  * Packed means a four-component tangent channel with no separate normal or
  * binormal data. The emitter creates empty arrays for absent channels, so empty
@@ -247,7 +247,7 @@ export function isPacked(mesh)
 }
 
 /**
- * Unpack a packed gr2_json mesh in place: replaces the 4-component packed `tangent`
+ * Unpack a packed GR2 JSON mesh in place: replaces the 4-component packed `tangent`
  * with explicit `normal`, `tangent` (xyz) and `binormal` (xyz) channels.
  * Null-frame vertices get zero vectors (call generateNormals/Tangents to fill them).
  *

@@ -1,66 +1,59 @@
-/**
- * Legacy gr2_json emitter and serializer.
- *
- * `emitGr2Json(fileInfo, version)` returns a plain object whose key order
- * mirrors the native emitter. `stringifyGr2Json(obj)` emits compact JSON with
- * printf("%.9g")-compatible floats. Normalized integer values are dequantized
- * with float32 reciprocals, Real16 values are already converted by reader.js, and
+﻿/**
+ * GR2 JSON emitter.
+ * @author cppctamber
+ * `emitJson(fileInfo, version)` returns a plain object whose key order
+ * mirrors the reader schema. Normalized integer values are dequantized with
+ * float32 reciprocals, Real16 values are already converted by reader.js, and
  * non-finite floats are serialized as 0.
  */
 
 const fr = Math.fround;
 
 /**
- * Member type ids whose numeric values need conversion for gr2_json output.
+ * Member type ids whose numeric values need conversion for GR2 JSON output.
  */
-export const GR2JSON_MEMBER_TYPES = Object.freeze({
+const MEMBER_TYPES = Object.freeze({
     Real32: 10, Int8: 11, UInt8: 12, BinormalInt8: 13, NormalUInt8: 14,
     Int16: 15, UInt16: 16, BinormalInt16: 17, NormalUInt16: 18,
     Int32: 19, UInt32: 20, Real16: 21
 });
-const T = GR2JSON_MEMBER_TYPES;
+const T = MEMBER_TYPES;
 
 /** Float32 reciprocal used to dequantize NormalUInt8 values. */
-export const GR2JSON_INV255 = fr(1 / 255);
+const INV255_VALUE = fr(1 / 255);
 
 /** Float32 reciprocal used to dequantize NormalUInt16 values. */
-export const GR2JSON_INV65535 = fr(1 / 65535);
+const INV65535_VALUE = fr(1 / 65535);
 
 /** Float32 reciprocal used to dequantize BinormalInt8 values. */
-export const GR2JSON_INV127 = fr(1 / 127);
+const INV127_VALUE = fr(1 / 127);
 
 /** Float32 reciprocal used to dequantize BinormalInt16 values. */
-export const GR2JSON_INV32767 = fr(1 / 32767);
+const INV32767_VALUE = fr(1 / 32767);
 
 const
-    INV255 = GR2JSON_INV255,
-    INV65535 = GR2JSON_INV65535,
-    INV127 = GR2JSON_INV127,
-    INV32767 = GR2JSON_INV32767;
+    INV255 = INV255_VALUE,
+    INV65535 = INV65535_VALUE,
+    INV127 = INV127_VALUE,
+    INV32767 = INV32767_VALUE;
 
 /**
- * JSON-compatible value accepted by {@link stringifyGr2Json}.
+ * Node keys accepted by {@link emitJson}'s `options.classes` map.
  *
- * @typedef {null|boolean|number|string|JsonValue[]|{[key: string]: JsonValue}} JsonValue
- */
-
-/**
- * Node keys accepted by {@link emitGr2Json}'s `options.classes` map.
- *
- * Each key names one gr2_json node shape; the mapped constructor is
+ * Each key names one GR2 JSON node shape; the mapped constructor is
  * instantiated with `new` and populated with that node's usual fields instead
  * of a plain object literal.
  */
-export const GR2JSON_CLASS_KEYS = Object.freeze([
+export const CLASS_KEYS = Object.freeze([
     "Root", "Mesh", "BoneBinding", "IndexGroup", "MorphTarget", "Model",
     "Skeleton", "Bone", "Animation", "TrackGroup", "TransformTrack", "Curve"
 ]);
 
 /**
- * Constructors used to hydrate gr2_json nodes as class instances.
+ * Constructors used to hydrate GR2 JSON nodes as class instances.
  *
  * Every key is optional; node types with no matching constructor keep the
- * default plain-object shape. See {@link GR2JSON_CLASS_KEYS} for valid keys.
+ * default plain-object shape. See {@link CLASS_KEYS} for valid keys.
  *
  * @typedef {{[key: string]: new () => object}} Gr2NodeClasses
  */
@@ -81,7 +74,7 @@ function build(classes, key, props)
 }
 
 /**
- * Root object emitted in the legacy `gr2_json` shape.
+ * Root object emitted in the GR2 JSON shape.
  *
  * @typedef {object} Gr2JsonRoot
  * @property {number} grannyFileFormatRevision Granny file format revision.
@@ -92,7 +85,7 @@ function build(classes, key, props)
  */
 
 /**
- * Convert a reflected numeric value to the float convention used by gr2_json.
+ * Convert a reflected numeric value to the float convention used by GR2 JSON.
  *
  * @param {number} v Raw reflected numeric value.
  * @param {number} memberType Granny member type id.
@@ -120,7 +113,7 @@ function convert(v, memberType)
 }
 
 /**
- * Replace non-finite JSON numbers with zero, matching the legacy emitter.
+ * Replace non-finite JSON numbers with zero.
  *
  * @param {number} v Candidate numeric value.
  * @returns {number} The original finite value, or zero.
@@ -179,16 +172,16 @@ function scalarArray(a)
 }
 
 /**
- * Granny curve format ids emitted by the legacy gr2_json curve serializer.
+ * Granny curve format ids emitted by the GR2 JSON curve serializer.
  */
-export const GR2JSON_CURVE_FORMATS = Object.freeze({
+const CURVE_FORMATS = Object.freeze({
     DaKeyframes32f: 0, DaK32fC32f: 1, DaIdentity: 2, DaConstant32f: 3,
     D3Constant32f: 4, D4Constant32f: 5, DaK16uC16u: 6, DaK8uC8u: 7,
     D4nK16uC15u: 8, D4nK8uC7u: 9, D3K16uC16u: 10, D3K8uC8u: 11,
     D9I1K16uC16u: 12, D9I3K16uC16u: 13, D9I1K8uC8u: 14, D9I3K8uC8u: 15,
     D3I1K32fC32f: 16, D3I1K16uC16u: 17, D3I1K8uC8u: 18
 });
-const F = GR2JSON_CURVE_FORMATS;
+const F = CURVE_FORMATS;
 
 /**
  * Locate the inline curve-data header inside a reflected curve-data object.
@@ -222,7 +215,7 @@ function farr(a) { return scalarArray(a).map(x => sf(fr(x))); }
 function uarr(a) { return scalarArray(a).map(x => x >>> 0); }
 
 /**
- * Emit one Granny Curve2 object in legacy gr2_json form.
+ * Emit one Granny Curve2 object in GR2 JSON form.
  *
  * @param {object} curve2 Reflected Granny curve object.
  * @param {Gr2NodeClasses} [classes] Opt-in node class map.
@@ -336,7 +329,7 @@ function emitVariant(v)
 /**
  * Attach converted extended data when the reflected variant is present.
  *
- * @param {object} target Emitted gr2_json object to mutate.
+ * @param {object} target Emitted GR2 JSON object to mutate.
  * @param {object|null|undefined} ext Reflected extended-data variant.
  * @returns {void}
  */
@@ -349,7 +342,7 @@ function addExtendedData(target, ext)
 }
 
 /**
- * Emit one reflected Granny morph target (blend shape) in gr2_json shape.
+ * Emit one reflected Granny morph target (blend shape) in GR2 JSON shape.
  *
  * Morph target vertex data uses the same deinterleaved channel layout as a
  * mesh's primary vertex data.
@@ -380,7 +373,7 @@ function emitMorphTarget(mt, classes = {})
 }
 
 /**
- * Emit a reflected Granny mesh in legacy gr2_json shape.
+ * Emit a reflected Granny mesh in GR2 JSON shape.
  *
  * @param {object} mesh Reflected Granny mesh object.
  * @param {Gr2NodeClasses} [classes] Opt-in node class map.
@@ -445,7 +438,7 @@ function emitMesh(mesh, classes = {})
 }
 
 /**
- * Emit a reflected Granny skeleton bone in legacy gr2_json shape.
+ * Emit a reflected Granny skeleton bone in GR2 JSON shape.
  *
  * @param {object} bone Reflected Granny bone object.
  * @param {Gr2NodeClasses} [classes] Opt-in node class map.
@@ -468,7 +461,7 @@ function emitBone(bone, classes = {})
 }
 
 /**
- * Emit a reflected Granny skeleton in legacy gr2_json shape.
+ * Emit a reflected Granny skeleton in GR2 JSON shape.
  *
  * @param {object|null} skel Reflected Granny skeleton object.
  * @param {Gr2NodeClasses} [classes] Opt-in node class map.
@@ -484,7 +477,7 @@ function emitSkeleton(skel, classes = {})
 }
 
 /**
- * Emit a reflected Granny model in legacy gr2_json shape.
+ * Emit a reflected Granny model in GR2 JSON shape.
  *
  * @param {object} model Reflected Granny model object.
  * @param {object} fileInfo Root reflected Granny file-info object.
@@ -507,7 +500,7 @@ function emitModel(model, fileInfo, classes = {})
 }
 
 /**
- * Emit a reflected Granny transform track in legacy gr2_json shape.
+ * Emit a reflected Granny transform track in GR2 JSON shape.
  *
  * @param {object} tt Reflected Granny transform-track object.
  * @param {Gr2NodeClasses} [classes] Opt-in node class map.
@@ -525,7 +518,7 @@ function emitTransformTrack(tt, classes = {})
 }
 
 /**
- * Emit a reflected Granny track group in legacy gr2_json shape.
+ * Emit a reflected Granny track group in GR2 JSON shape.
  *
  * @param {object} tg Reflected Granny track-group object.
  * @param {Gr2NodeClasses} [classes] Opt-in node class map.
@@ -540,7 +533,7 @@ function emitTrackGroup(tg, classes = {})
 }
 
 /**
- * Emit a reflected Granny animation in legacy gr2_json shape.
+ * Emit a reflected Granny animation in GR2 JSON shape.
  *
  * @param {object} anim Reflected Granny animation object.
  * @param {Gr2NodeClasses} [classes] Opt-in node class map.
@@ -561,24 +554,24 @@ function emitAnimation(anim, classes = {})
 }
 
 /**
- * Convert a reflected `granny_file_info` graph into the legacy `gr2_json` object.
+ * Convert a reflected `granny_file_info` graph into a GR2 JSON object.
  *
- * The key order and numeric conversion rules intentionally match the native
- * `evegr2tojson` output so downstream tools can compare serialized output.
+ * The key order and numeric conversion rules are stable so downstream tools can
+ * compare emitted data.
  *
  * When `options.classes` is given, matching node types are instantiated and
- * populated as class instances instead of plain object literals — an opt-in
+ * populated as class instances instead of plain object literals; an opt-in
  * alternative to walking the returned JSON into application-specific classes
- * by hand. See {@link GR2JSON_CLASS_KEYS} for the recognized keys.
+ * by hand. See {@link CLASS_KEYS} for the recognized keys.
  *
  * @param {object} fileInfo Reflected `granny_file_info` object from `reader.js`.
  * @param {number} version Granny file format revision.
  * @param {object} [options] Emission options.
  * @param {Gr2NodeClasses} [options.classes] Opt-in node class map.
- * @returns {Gr2JsonRoot} Plain JSON-compatible `gr2_json` object, or a
+ * @returns {Gr2JsonRoot} Plain JSON-compatible `GR2 JSON` object, or a
  * populated `classes.Root` instance when provided.
  */
-export function emitGr2Json(fileInfo, version, options = {})
+export function emitJson(fileInfo, version, options = {})
 {
     const { classes = {} } = options;
     return build(classes, "Root", {
@@ -589,159 +582,3 @@ export function emitGr2Json(fileInfo, version, options = {})
         animations: (fileInfo.Animations || []).filter(a => a).map(a => emitAnimation(a, classes))
     });
 }
-
-/**
- * Extract exact decimal digits for printf-style significant-digit rounding.
- *
- * @param {number} v Finite JavaScript number.
- * @returns {{neg: boolean, digits: string, exp10: number}} Exact decimal digit metadata.
- */
-function exactDigits(v)
-{
-    const dv = new DataView(new ArrayBuffer(8));
-    dv.setFloat64(0, v);
-    const
-        hi = dv.getUint32(0),
-        lo = dv.getUint32(4),
-        neg = !!(hi >>> 31),
-        be = (hi >>> 20) & 0x7ff;
-    let mant = (BigInt(hi & 0xfffff) << 32n) | BigInt(lo);
-    let e2;
-    if (be === 0) { e2 = -1074; }
-    else { mant |= 1n << 52n; e2 = be - 1075; }
-    let intPart, fracDigits = "";
-    if (e2 >= 0)
-    {
-        intPart = (mant << BigInt(e2)).toString();
-    }
-    else
-    {
-        const
-            k = -e2,
-            scaled = mant * (5n ** BigInt(k));
-        let s = scaled.toString().padStart(k + 1, "0");
-        intPart = s.slice(0, s.length - k) || "0";
-        fracDigits = s.slice(s.length - k);
-    }
-    let all = (intPart + fracDigits).replace(/^0+/, "");
-    const exp10 = intPart.replace(/^0+/, "").length > 0
-        ? intPart.replace(/^0+/, "").length - 1
-        : -(fracDigits.length - fracDigits.replace(/^0+/, "").length) - 1;
-    all = all.replace(/0+$/, "") || "0";
-    return { neg, digits: all, exp10 };
-}
-
-/**
- * Format a finite number with C `printf("%.9g")`-compatible rounding.
- *
- * Non-finite values are serialized as `0`, matching the legacy JSON emitter.
- *
- * @param {number} v Number to format.
- * @returns {string} Decimal representation using at most 9 significant digits.
- */
-export function g9(v)
-{
-    if (!Number.isFinite(v)) v = 0;
-    if (v === 0) return Object.is(v, -0) ? "-0" : "0";
-    const P = 9;
-    let { neg, digits, exp10 } = exactDigits(v);
-
-    if (digits.length > P)
-    {
-        const
-            keep = digits.slice(0, P),
-            rest = digits.slice(P);
-        let roundUp = false;
-        if (rest[0] > "5") roundUp = true;
-        else if (rest[0] === "5")
-        {
-            if (/[1-9]/.test(rest.slice(1))) roundUp = true;
-            else roundUp = (keep.charCodeAt(P - 1) - 48) % 2 === 1;
-        }
-        if (roundUp)
-        {
-            let arr = keep.split(""), i = P - 1;
-            for (;;)
-            {
-                if (arr[i] === "9") { arr[i] = "0"; i--; if (i < 0) { arr.unshift("1"); exp10++; break; } }
-                else { arr[i] = String.fromCharCode(arr[i].charCodeAt(0) + 1); break; }
-            }
-            digits = arr.join("");
-        }
-        else digits = keep;
-    }
-    digits = digits.replace(/0+$/, "") || "0";
-    const sign = neg ? "-" : "";
-
-    if (exp10 < -4 || exp10 >= P)
-    {
-        const
-            m = digits.length > 1 ? digits[0] + "." + digits.slice(1) : digits,
-            es = exp10 < 0 ? "-" : "+";
-        return `${sign}${m}e${es}${Math.abs(exp10).toString().padStart(2, "0")}`;
-    }
-    if (exp10 >= 0)
-    {
-        if (digits.length <= exp10 + 1) return sign + digits.padEnd(exp10 + 1, "0");
-        return sign + digits.slice(0, exp10 + 1) + "." + digits.slice(exp10 + 1);
-    }
-    return sign + "0." + "0".repeat(-exp10 - 1) + digits;
-}
-
-/**
- * Serialize one JSON number using legacy integer and float formatting rules.
- *
- * @param {number} v Number to serialize.
- * @returns {string} Compact numeric token.
- */
-function numStr(v)
-{
-    if (typeof v !== "number") return String(v);
-    if (Number.isInteger(v) && !Object.is(v, -0) && Math.abs(v) < 4294967296) return String(v);
-    return g9(v);
-}
-
-/**
- * Serialize a `gr2_json` value using the legacy emitter's compact formatting.
- *
- * This differs from `JSON.stringify` mainly in float formatting and duplicate
- * Granny member-name handling.
- *
- * @param {JsonValue} node Value to serialize.
- * @returns {string} Compact JSON text.
- */
-export function stringifyGr2Json(node)
-{
-    if (node === null || node === undefined) return "null";
-    if (typeof node === "number") return numStr(node);
-    if (typeof node === "string") return JSON.stringify(node);
-    if (typeof node === "boolean") return node ? "true" : "false";
-    if (Array.isArray(node)) return "[" + node.map(stringifyGr2Json).join(",") + "]";
-    const parts = [];
-    for (const k of Object.keys(node))
-    {
-        const printed = k.includes(" ") ? k.slice(0, k.indexOf(" ")) : k;
-        parts.push(JSON.stringify(printed) + ":" + stringifyGr2Json(node[k]));
-    }
-    return "{" + parts.join(",") + "}";
-}
-
-/**
- * Frozen convenience namespace for gr2_json emission and serialization helpers.
- *
- * The same constants and functions are also exported directly from gr2json.js.
- */
-export const gr2json = Object.freeze({
-    MEMBER_TYPES: GR2JSON_MEMBER_TYPES,
-    CURVE_FORMATS: GR2JSON_CURVE_FORMATS,
-    CLASS_KEYS: GR2JSON_CLASS_KEYS,
-    INV255: GR2JSON_INV255,
-    INV65535: GR2JSON_INV65535,
-    INV127: GR2JSON_INV127,
-    INV32767: GR2JSON_INV32767,
-    emit: emitGr2Json,
-    emitGr2Json,
-    stringify: stringifyGr2Json,
-    stringifyGr2Json,
-    g9
-});

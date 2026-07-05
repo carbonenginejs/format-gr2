@@ -1,19 +1,19 @@
 # Third-party notices
 
-`gr2reader` is licensed **MIT** (see [LICENSE](./LICENSE)). It contains no RAD/Granny
+`reader-gr2` is licensed **MIT** (see [LICENSE](./LICENSE)). It contains no RAD/Granny
 proprietary code and does not link `granny2.dll`. The two section decompressors are
 pure-JS ports of open reverse-engineering work, both under permissive licenses
 compatible with MIT. Provenance and license texts follow.
 
 ---
 
-## Oodle1 / Oodle0 decompressor — `src/codecs/oodle1.js`
+## Oodle1 / Oodle0 decompressor - `src/codecs/oodle1.js`
 
 **Boost Software License 1.0.** Ported from the Granny `gr2_decompress` implementation
 shipped in [Arbos/nwn2mdk](https://github.com/Arbos/nwn2mdk) (the decompressor is
 originally by *berenm* and is distributed under Boost 1.0, separate from nwn2mdk's
 Apache-2.0 format code). Cross-checked for correctness against
-[arves100/opengr2](https://github.com/arves100/opengr2) `oodle1.c` (MPL-2.0) — used as a
+[arves100/opengr2](https://github.com/arves100/opengr2) `oodle1.c` (MPL-2.0) - used as a
 verification reference only; no opengr2 code was copied, so MPL-2.0 does not apply.
 
 ```
@@ -43,7 +43,7 @@ DEALINGS IN THE SOFTWARE.
 
 ---
 
-## BitKnit / BitKnit2 decompressor — `src/codecs/bitknit2.js`
+## BitKnit / BitKnit2 decompressor - `src/codecs/bitknit2.js`
 
 **Currently EUPL-1.2 (copyleft).** This decoder was transcribed from
 [neptuwunium/Knit](https://github.com/neptuwunium/Knit) `GrannyBitKnitCompression.cs`
@@ -51,8 +51,8 @@ DEALINGS IN THE SOFTWARE.
 [eiz/pybg3](https://github.com/eiz/pybg3) (`src/rans.h`, MIT). Cross-checked against
 powzix/ooz `bitknit.cpp`.
 
-> **STATUS — blocks MIT.** Because this file currently derives from Knit's EUPL-1.2
-> expression, `gr2reader` cannot be released under MIT as-is (EUPL-1.2 reciprocity applies).
+> **STATUS - blocks MIT.** Because this file currently derives from Knit's EUPL-1.2
+> expression, `reader-gr2` cannot be released under MIT as-is (EUPL-1.2 reciprocity applies).
 > To ship MIT, `bitknit2.js` must be re-derived directly from pybg3's MIT `rans.h`.
 > That re-base was attempted and reverted (the port lost Granny's section framing);
 > it is **deferred**. Until it lands, treat the combined work as **EUPL-1.2**, and the
@@ -60,7 +60,7 @@ powzix/ooz `bitknit.cpp`.
 
 ---
 
-## Granny animation-curve decompression — `src/curves/**`
+## Granny animation-curve decompression - `src/curves/**`
 
 Authored by **cppctamber** as part of ccpwgl2 (`src/core/reader/granny/curves`), the
 same author/owner as this library; included here under this project's MIT license.

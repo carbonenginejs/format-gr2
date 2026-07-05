@@ -2,6 +2,13 @@ node_modules/
 *.log
 .DS_Store
 
+# Local agent/tool state. The org root owns durable agent KB by default.
+.agents/
+.claude/
+.codex/
+.skill/
+.skills/
+
 # local test fixtures / downloaded oracle data (never commit game assets)
 /.cache/
 /test/fixtures/

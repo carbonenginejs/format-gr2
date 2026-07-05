@@ -1,5 +1,5 @@
-carbonenginejs/gr2reader
-========================
+carbonenginejs/reader-gr2
+=========================
 
 A pure-JavaScript reader for RAD Game Tools' Granny 3D (.gr2) file format.
 Contains no RAD/Granny code and does not link granny2.dll. Section decompression
@@ -18,7 +18,7 @@ BitKnit / BitKnit2 section decompressor (src/codecs/bitknit2.js)
   Ported from:
     - neptuwunium/Knit  "GrannyBitKnitCompression.cs"  (EUPL-1.2, sublicensing
       eiz/pybg3's clean-room rANS implementation under MIT)
-      https://github.com/neptuwunium/Knit  •  https://github.com/eiz/pybg3
+      https://github.com/neptuwunium/Knit  -  https://github.com/eiz/pybg3
   Cross-checked against powzix/ooz "bitknit.cpp".
 
 Granny curve decompression (src/curves/**, optional; enabled via decompressCurves)

@@ -15,11 +15,29 @@ import { decompressOodle1 } from "./oodle1.js";
  * that need to inspect raw type metadata.
  */
 export const GRANNY_MEMBER_TYPES = Object.freeze({
-    End: 0, Inline: 1, Reference: 2, ReferenceToArray: 3, ArrayOfReferences: 4,
-    VariantReference: 5, UnsupportedRemove: 6, ReferenceToVariantArray: 7,
-    String: 8, Transform: 9, Real32: 10, Int8: 11, UInt8: 12, BinormalInt8: 13,
-    NormalUInt8: 14, Int16: 15, UInt16: 16, BinormalInt16: 17, NormalUInt16: 18,
-    Int32: 19, UInt32: 20, Real16: 21, EmptyReference: 22
+    End: 0, 
+    Inline: 1, 
+    Reference: 2, 
+    ReferenceToArray: 3, 
+    ArrayOfReferences: 4,
+    VariantReference: 5, 
+    UnsupportedRemove: 6, 
+    ReferenceToVariantArray: 7,
+    String: 8, 
+    Transform: 9, 
+    Real32: 10, 
+    Int8: 11, 
+    UInt8: 12, 
+    BinormalInt8: 13,
+    NormalUInt8: 14, 
+    Int16: 15, 
+    UInt16: 16, 
+    BinormalInt16: 17, 
+    NormalUInt16: 18,
+    Int32: 19, 
+    UInt32: 20, 
+    Real16: 21, 
+    EmptyReference: 22
 });
 const M = GRANNY_MEMBER_TYPES;
 /** Size in bytes of a reflected Granny transform member. */

@@ -1,7 +1,6 @@
 /**
- * Granny animation-curve decompression helpers.
- *
- * `decodeCurve(curveJson, dimension)` takes a gr2_json curve object in the
+ * Granny animation-curve decompression helpers 
+ * `decodeCurve(curveJson, dimension)` takes a GR2 JSON curve object in the
  * shape emitted by PrintCurve2 and returns explicit knots and controls.
  */
 
@@ -680,7 +679,7 @@ export const decodeD3I1K16uC16u = decodeD3I1u;
 export const decodeD3I1K8uC8u = decodeD3I1u;
 
 /**
- * Curve object as emitted inside gr2_json transform tracks.
+ * Curve object as emitted inside GR2 JSON transform tracks.
  *
  * @typedef {object} CurveJson
  * @property {number} format Granny animation-curve format id.
@@ -747,9 +746,9 @@ for (let i = 0; i < CURVE_DECODERS.length; i++)
 }
 
 /**
- * Decode a gr2_json curve object into explicit knots/controls.
+ * Decode a GR2 JSON curve object into explicit knots/controls.
  *
- * @param {CurveJson} curveJson Curve as emitted in gr2_json.
+ * @param {CurveJson} curveJson Curve as emitted in GR2 JSON.
  * @param {TransformCurveDimension} dimension Track dimension: position = 3, orientation = 4, scaleShear = 9.
  * @returns {DecodedCurve} Explicit knots and flat control values.
  * @throws {Error} If the curve is missing a numeric format, the format is not
@@ -784,11 +783,11 @@ export function decodeCurve(curveJson, dimension)
 }
 
 /**
- * Decode the three curves of every transform track of a gr2_json object in
+ * Decode the three curves of every transform track of a GR2 JSON object in
  * place. Adds knots, controls and dimension to each curve object; all raw
  * compressed fields are left untouched.
  *
- * @param {object} json gr2_json root object to mutate.
+ * @param {object} json GR2 JSON root object to mutate.
  * @returns {object} The same object, for chaining.
  */
 export function decompressAnimationCurves(json)
