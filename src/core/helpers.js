@@ -244,35 +244,6 @@ function triangleFaces(mesh, meshIndex, feature)
     return faces;
 }
 
-function normalize3(x, y, z)
-{
-    const len = Math.hypot(x, y, z) || 1;
-    return [ x / len, y / len, z / len ];
-}
-
-function generatedBiNormals(normals, tangentValues)
-{
-    if (normals.length !== tangentValues.length)
-    {
-        throw new Error("CjsFormatGr2 rebuildMissingBiNormals requires normals and tangents with matching lengths");
-    }
-
-    const out = new Array(normals.length);
-    for (let i = 0; i < normals.length; i += 3)
-    {
-        const b = normalize3(
-            normals[i + 1] * tangentValues[i + 2] - normals[i + 2] * tangentValues[i + 1],
-            normals[i + 2] * tangentValues[i] - normals[i] * tangentValues[i + 2],
-            normals[i] * tangentValues[i + 1] - normals[i + 1] * tangentValues[i]
-        );
-        out[i] = b[0];
-        out[i + 1] = b[1];
-        out[i + 2] = b[2];
-    }
-
-    return out;
-}
-
 function shouldApplyMeshRule(reader, rule, context)
 {
     const fullContext = { reader, ...context };
@@ -332,7 +303,7 @@ function rebuildMeshBiNormals(mesh, meshIndex)
         normals = requireVertexChannel(mesh, meshIndex, "normal", "rebuildMissingBiNormals"),
         tangentValues = requireVertexChannel(mesh, meshIndex, "tangent", "rebuildMissingBiNormals");
 
-    mesh.vertex.binormal = generatedBiNormals(normals, tangentValues);
+    mesh.vertex.binormal = tangents.generateBiNormals(normals, tangentValues);
 }
 
 function rebuildMissingMeshData(reader, json, raw, values)

@@ -42,6 +42,9 @@
     "README.md"
   ],
   "license": "EUPL-1.2",
+  "dependencies": {
+    "@carbonenginejs/core-math": "^0.1.1"
+  },
   "devDependencies": {
     "eslint": "^8.57.1"
   }
