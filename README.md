@@ -7,6 +7,12 @@ It decodes every section-compression codec used by current EVE Online assets
 (None, Oodle1, BitKnit2), reconstructs the Granny object graph by walking the
 file's embedded type tree, and emits GR2 JSON or caller-supplied classes.
 
+This reader targets GR2 assets and packed tangent conventions used by
+CarbonEngine and Fenris Creations (CCP Games). The tangent-frame math is a
+JavaScript implementation derived from observed EVE/CarbonEngine shader
+behavior; no Fenris Creations (CCP Games) shader source is copied here. See
+`NOTICE` and `THIRD-PARTY-NOTICES.md`.
+
 ## Install
 
 ```sh
@@ -253,3 +259,6 @@ is replaced, removed, or re-derived from permissively licensed sources. See
 redistribution requirements.
 
 Contains no RAD/Granny proprietary code and does not link `granny2.dll`.
+CarbonEngine and Fenris Creations (CCP Games) source material, tools, assets,
+formats, and shader behavior remain copyright their original holders. This
+package is not affiliated with or endorsed by CCP Games.

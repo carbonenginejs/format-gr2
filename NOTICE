@@ -8,6 +8,8 @@ is reimplemented from clean-room / open reverse-engineering efforts, listed belo
 CarbonEngineJS-facing code is copyright cppctamber / CarbonEngineJS
 contributors. CarbonEngine source material, formats, class names, and schema
 semantics remain copyright their original CarbonEngine authors.
+Fenris Creations (CCP Games) source material, tools, assets, shader behavior,
+and EVE-related data remain copyright their original holders.
 
 Current repository license: EUPL-1.2. See LICENSE.
 
@@ -18,11 +20,15 @@ Provenance and legal requirements
 ---------------------------------
 
 When this package copies, ports, translates, or derives from CarbonEngine,
-ccpwgl, CCP/EVE assets or tools, RAD/Granny materials, or any third-party
-library, the relevant section below must record the upstream copyright holders,
-project/repository, file path, revision when known, license name, and required
-redistribution obligations. Behavioral references with no copied expression
-should be marked as references only.
+ccpwgl, Fenris Creations (CCP Games) / EVE assets or tools, RAD/Granny
+materials, or any third-party library, the relevant section below must record
+the upstream copyright holders, project/repository, file path, revision when
+known, license name, and required redistribution obligations. Behavioral
+references with no copied expression should be marked as references only.
+
+CarbonEngine and Fenris Creations (CCP Games) are mentioned for interoperability
+and provenance context. This package is not affiliated with or endorsed by CCP
+Games.
 
 Third-party algorithm provenance
 --------------------------------
