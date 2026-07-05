@@ -7,6 +7,12 @@ It decodes every section-compression codec used by current EVE Online assets
 (None, Oodle1, BitKnit2), reconstructs the Granny object graph by walking the
 file's embedded type tree, and emits GR2 JSON or caller-supplied classes.
 
+## Install
+
+```sh
+npm install @carbonenginejs/reader-gr2
+```
+
 ## Public API
 
 The package root exports one public class: `CjsGr2Reader`. The `Cjs` prefix
