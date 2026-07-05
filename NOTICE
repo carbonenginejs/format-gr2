@@ -5,6 +5,20 @@ A pure-JavaScript reader for RAD Game Tools' Granny 3D (.gr2) file format.
 Contains no RAD/Granny code and does not link granny2.dll. Section decompression
 is reimplemented from clean-room / open reverse-engineering efforts, listed below.
 
+CarbonEngineJS-facing code is copyright cppctamber / CarbonEngineJS
+contributors. CarbonEngine source material, formats, class names, and schema
+semantics remain copyright their original CarbonEngine authors.
+
+Provenance and legal requirements
+---------------------------------
+
+When this package copies, ports, translates, or derives from CarbonEngine,
+ccpwgl, CCP/EVE assets or tools, RAD/Granny materials, or any third-party
+library, the relevant section below must record the upstream copyright holders,
+project/repository, file path, revision when known, license name, and required
+redistribution obligations. Behavioral references with no copied expression
+should be marked as references only.
+
 Third-party algorithm provenance
 --------------------------------
 
