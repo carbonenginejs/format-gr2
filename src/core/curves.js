@@ -706,7 +706,7 @@ export const decodeD3I1K8uC8u = decodeD3I1u;
 /**
  * Track dimension accepted by Granny transform curves.
  *
- * @typedef {3|4|9} TransformCurveDimension
+ * @typedef {1|3|4|9} TransformCurveDimension
  */
 
 /**
@@ -780,6 +780,239 @@ export function decodeCurve(curveJson, dimension)
         degree: curveJson.degree | 0,
         dimension: dim || dimension
     };
+}
+
+/**
+ * Copy one decoded control point into an output buffer.
+ *
+ * @param {ArrayLike<number> & { [index: number]: number }} out Mutable output buffer.
+ * @param {DecodedCurve} curve Decoded curve.
+ * @param {number} index Control point index.
+ * @returns {ArrayLike<number>} The same output buffer.
+ */
+function copyControl(out, curve, index)
+{
+    const
+        dim = curve.dimension,
+        offset = index * dim;
+
+    for (let i = 0; i < dim; i++)
+    {
+        out[i] = curve.controls[offset + i];
+    }
+
+    return out;
+}
+
+/**
+ * Locate the first knot strictly greater than time, matching the existing
+ * runtime curve evaluator's step/segment selection.
+ *
+ * @param {number[]} knots Decoded knot times.
+ * @param {number} time Sample time.
+ * @returns {number} Knot index.
+ */
+function findKnotIndex(knots, time)
+{
+    let low = 0;
+    let high = knots.length - 1;
+
+    while (low < high)
+    {
+        const mid = (low + high) >> 1;
+        if (knots[mid] > time) high = mid;
+        else low = mid + 1;
+    }
+
+    return low;
+}
+
+/**
+ * Sample Carbon's raw keyframed Granny curves (`DaKeyframes32f`).
+ *
+ * @param {ArrayLike<number> & { [index: number]: number }} out Mutable output buffer.
+ * @param {DecodedCurve} curve Decoded curve.
+ * @param {number} time Sample time.
+ * @param {number} duration Animation duration.
+ * @returns {ArrayLike<number>} The same output buffer.
+ */
+function sampleKeyframedCurve(out, curve, time, duration)
+{
+    const count = curve.controls.length / curve.dimension;
+    const frame = duration > 0 ? Math.trunc(count * time / duration) : 0;
+    return copyControl(out, curve, Math.max(0, Math.min(count - 1, frame)));
+}
+
+/**
+ * Sample a decoded degree-one curve.
+ *
+ * @param {ArrayLike<number> & { [index: number]: number }} out Mutable output buffer.
+ * @param {DecodedCurve} curve Decoded curve.
+ * @param {number} time Sample time.
+ * @param {boolean} cycle Whether the owning track cycles.
+ * @param {number} duration Animation duration.
+ * @param {number} knot Selected knot index.
+ * @returns {ArrayLike<number>} The same output buffer.
+ */
+function sampleLinearCurve(out, curve, time, cycle, duration, knot)
+{
+    const
+        knots = curve.knots,
+        count = knots.length,
+        dim = curve.dimension,
+        knot0 = cycle ? (knot + count - 1) % count : knot === 0 ? 0 : knot - 1;
+
+    let
+        start = knots[knot0],
+        end = knots[knot],
+        localTime = time;
+
+    if (cycle && end < start)
+    {
+        end += duration;
+    }
+
+    if (cycle && localTime < start)
+    {
+        localTime += duration;
+    }
+
+    const t = end !== start ? (localTime - start) / (end - start) : 0;
+    const p0 = knot0 * dim;
+    const p1 = knot * dim;
+
+    for (let i = 0; i < dim; i++)
+    {
+        out[i] = curve.controls[p0 + i] * (1 - t) + curve.controls[p1 + i] * t;
+    }
+
+    return out;
+}
+
+/**
+ * Sample the quadratic decoded curves emitted by modern Granny animation data.
+ *
+ * @param {ArrayLike<number> & { [index: number]: number }} out Mutable output buffer.
+ * @param {DecodedCurve} curve Decoded curve.
+ * @param {number} time Sample time.
+ * @param {boolean} cycle Whether the owning track cycles.
+ * @param {number} duration Animation duration.
+ * @param {number} knot Selected knot index.
+ * @returns {ArrayLike<number>} The same output buffer.
+ */
+function sampleQuadraticCurve(out, curve, time, cycle, duration, knot)
+{
+    const
+        knots = curve.knots,
+        count = knots.length,
+        dim = curve.dimension,
+        k2 = cycle ? (knot + count - 2) % count : knot === 0 ? 0 : Math.max(0, knot - 2),
+        k1 = cycle ? (knot + count - 1) % count : knot === 0 ? 0 : knot - 1;
+
+    let
+        ti2 = knots[k2],
+        ti1 = knots[k1],
+        ti = knots[knot],
+        tiNext = knots[(knot + 1) % count],
+        localTime = time;
+
+    if (ti2 > ti)
+    {
+        ti += duration;
+        tiNext += duration;
+        localTime += duration;
+    }
+
+    if (ti1 > ti)
+    {
+        ti += duration;
+        tiNext += duration;
+        localTime += duration;
+    }
+
+    if (tiNext < ti)
+    {
+        tiNext += duration;
+    }
+
+    const
+        d0 = ti - ti1,
+        d1a = ti - ti2,
+        d1b = tiNext - ti1,
+        l0 = d0 !== 0 ? (localTime - ti1) / d0 : 0,
+        l1a = d1a !== 0 ? (localTime - ti2) / d1a : 0,
+        l1b = d1b !== 0 ? (localTime - ti1) / d1b : 0;
+
+    let c2 = (l1a + l0) - l0 * l1a;
+    const
+        ci = l0 * l1b,
+        c1 = c2 - ci;
+    c2 = 1 - c2;
+
+    const
+        p0 = k2 * dim,
+        p1 = k1 * dim,
+        p2 = knot * dim;
+
+    for (let i = 0; i < dim; i++)
+    {
+        out[i] = c2 * curve.controls[p0 + i] +
+            c1 * curve.controls[p1 + i] +
+            ci * curve.controls[p2 + i];
+    }
+
+    return out;
+}
+
+/**
+ * Sample a decoded Granny curve into a caller-provided output buffer.
+ *
+ * This works only on decoded `{ knots, controls, degree, dimension }` data.
+ * Packed Granny curve parsing remains the responsibility of `decodeCurve`.
+ *
+ * @param {ArrayLike<number> & { [index: number]: number }} out Mutable output buffer.
+ * @param {DecodedCurve} curve Decoded curve.
+ * @param {number} time Sample time.
+ * @param {boolean} [cycle=false] Whether the owning track cycles.
+ * @param {number} [duration=0] Animation duration.
+ * @param {{ keyframed?: boolean }} [options] Sampling options.
+ * @returns {ArrayLike<number>} The same output buffer.
+ */
+export function sampleDecodedCurve(out, curve, time, cycle = false, duration = 0, options = {})
+{
+    if (!curve || !curve.knots || !curve.controls || !curve.dimension)
+    {
+        return out;
+    }
+
+    const
+        knots = curve.knots,
+        count = knots.length,
+        dim = curve.dimension,
+        controlCount = curve.controls.length / dim;
+
+    if (!count || !controlCount)
+    {
+        return out;
+    }
+
+    if (options.keyframed)
+    {
+        return sampleKeyframedCurve(out, curve, time, duration);
+    }
+
+    const knot = findKnotIndex(knots, time);
+    if (curve.degree <= 0 || count === 1 || controlCount === 1)
+    {
+        return copyControl(out, curve, Math.min(knot, controlCount - 1));
+    }
+
+    if (curve.degree === 1)
+    {
+        return sampleLinearCurve(out, curve, time, cycle, duration || knots[count - 1], knot);
+    }
+
+    return sampleQuadraticCurve(out, curve, time, cycle, duration || knots[count - 1], knot);
 }
 
 /**
@@ -857,6 +1090,8 @@ export const curves = Object.freeze({
     D4N_SCALE_TABLE_MULTIPLIER_8,
     decode: decodeCurve,
     decodeCurve,
+    sample: sampleDecodedCurve,
+    sampleDecodedCurve,
     decompress: decompressAnimationCurves,
     decompressAnimationCurves,
     knotScaleFromTrunc,

@@ -1,11 +1,12 @@
 {
   "name": "@carbonenginejs/format-gr2",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "CarbonEngineJS GR2 format package. Decodes RAD Granny .gr2 sections, walks the Granny type tree, and emits GR2 JSON or caller-supplied classes.",
   "type": "module",
   "main": "src/index.js",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./curves": "./src/core/curves.js"
   },
   "bin": {
     "format-gr2": "bin/gr2reader.js",
@@ -43,7 +44,7 @@
   ],
   "license": "EUPL-1.2",
   "dependencies": {
-    "@carbonenginejs/core-math": "^0.1.1"
+    "@carbonenginejs/core-math": "^0.1.5"
   },
   "devDependencies": {
     "eslint": "^8.57.1"
